@@ -41,7 +41,9 @@
 				var	$data = data || $this;
 
 				var	$content = $data.children( $this.data('selector') ).sort( function( a, b ) {
-						return Date.parse( $(b).data('datetime') ) - Date.parse( $(a).data('datetime') );
+						if ($(a).data('datetime')) {
+							return Date.parse( $(b).data('datetime') ) - Date.parse( $(a).data('datetime') );
+						}
 					}),
 					$nextUrls = $data.children('.nextPage');
 
@@ -54,12 +56,11 @@
 				}
 				else if ($blended.length > 0) {
 					$this.empty().append($blended);
+    				$this.trigger( 'blend', $this );
 				}
 				else if (window.console && console.error) {
 					console.error('Sorry, no content was found. Please try another selector.');
 				}
-
-				$this.trigger( 'blend', $this );
 
 			});
 
@@ -77,13 +78,13 @@
 				});
 
 				var	nextUrl = $this.data('uri-template').replace( /[^{]+(?=\})/g, function(segment, param){
-					var resource = segment.split(';').shift(),
+					var service = segment.split(';').shift(),
 						param = segment.split(';').pop();
 
-					return nextUrls[resource][param] || '';
+					return nextUrls[service][param] || '';
 				}).replace( /[\{\}]/g, '');
 
-				$this.trigger( 'next', $this );
+				$this.trigger( 'loadStart', $this );
 				$this.removeClass('loaded').addClass('loading');
 
 				$.ajax({
