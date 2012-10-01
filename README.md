@@ -5,9 +5,9 @@
 **Present aggregated content as a single blended and paginated stream.**
 This jQuery plugin is designed for use in conjunction with the [Storyteller platform][storyteller], but could prove useful anywhere content is paginated by one of these methods:
 
- - **Numbered pages:** Pages are computed based on available content and accessed sequentially. Examples: [Flickr][flickr] and [Vimeo][vimeo]
+ - **Numbered pages:** Pages are computed based on available content and accessed sequentially. Examples: [Flickr][flickr], [Vimeo][vimeo]
 
- - **Index/Offset:** Increments content by the index of the first content item in each “page” of content. Examples: [YouTube][youtube], [SoundCloud][soundcloud], [Facebook][facebook]
+ - **Index/Offset:** Increments content by the index of the first content item in each “page” of content.<br />Examples: [YouTube][youtube], [SoundCloud][soundcloud], [Facebook][facebook], [Tumblr][tumblr]
 
  - **Cursoring:** Increasingly typical of timeline-oriented social APIs, this method paginates using ranges of IDs rather than pre-computing “pages” of results. Examples: [Facebook][facebook], [Twitter][twitter], [Instagram][instagram]
 
@@ -159,6 +159,7 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 [google+]: https://developers.google.com/+/api/#pagination
 [instagram]: http://instagram.com/developer/endpoints#pagination
 [soundcloud]: http://developers.soundcloud.com/docs#pagination
+[tumblr]: http://www.tumblr.com/docs/en/api/v2#posts
 [twitter]: https://dev.twitter.com/docs/working-with-timelines
 [youtube]: https://developers.google.com/youtube/2.0/reference#Paging_through_Results
 [vimeo]: http://developer.vimeo.com/apis/advanced/methods/vimeo.videos.getAll
