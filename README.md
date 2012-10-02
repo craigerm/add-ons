@@ -150,6 +150,10 @@ A jQuery object may be optionally passed to this method to be blended but skippi
 
 Triggers the population of the relative pagination URL from related `<data>` elements in the content. An asynchronous request loads and appends it’s response to the stream.
 
+### `toggleScrolling`
+
+Disables scrolling by intercepting mouse scrolling events and keyboard events for relevant keys such as arrow keys, the spacebar, page up/down, and home/end. Scrolling is restored with another call. This can be useful in maintaining the scrolling position when new content is manipulated prior to insertion.
+
 
 License
 --------------------------------------------------------------------------------

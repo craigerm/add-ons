@@ -4,6 +4,7 @@
 	/// Copyright © 2012 Story Arc Corporation · storytellerhq.com
 
 	var loadingInProgress = false,
+        scrollingDisabled = false,
 		scrollingThreshold,
 
 		methods = {
@@ -143,6 +144,31 @@
 						$this.stStream('nextPage');
 				});
 
+			});
+
+		},
+		toggleScrolling: function(){
+			/// Method adapted from: http://stackoverflow.com/a/4770179/979684
+
+			function disable(event) {
+				event.preventDefault();
+			}
+
+			if( scrollingDisabled === false ) {
+				if (window.addEventListener) window.addEventListener('DOMMouseScroll', disable, false);
+				if (window.attachEvent)	window.attachEvent('DOMMouseScroll', disable);
+
+				scrollingDisabled = true;
+			} else {
+				if (window.removeEventListener) window.removeEventListener('DOMMouseScroll', disable, false);
+				if (window.detachEvent)	window.detachEvent('DOMMouseScroll', disable);
+
+				scrollingDisabled = false;
+			}
+
+			$(window).keydown(event, function() {
+				var keys = [37, 38, 39, 40]; // left: 37, up: 38, right: 39, down: 40, spacebar: 32, pageup: 33, pagedown: 34, end: 35, home: 36 */
+				if (scrollingDisabled === true && $.inArray(event.keyCode, keys) ) event.preventDefault();
 			});
 
 		}
