@@ -17,7 +17,7 @@
 
 				scrollingThreshold = $this.height() + $this.scrollTop();
 
-				$this.data( 'next-page-trigger', options.nextPageTrigger || $this.data('next-page-trigger') ) || 'manual';
+				$this.data( 'pagination', options.pagination || $this.data('pagination') ) || 'manual';
 				$this.data( 'selector', options.selector || $this.data('selector') || 'article' );
 				$this.data( 'uri-template', options.uriTemplate || $this.data('uri-template') );
 
@@ -26,7 +26,7 @@
 					return false;
 				}
 
-				if( $this.data( 'next-page-trigger') === 'scrolling' ) $this.stStream('scrollToInfinity');
+				if( $this.data( 'pagination') === 'scrolling' ) $this.stStream('scrollToInfinity');
 
 				$this.stStream('blend');
 

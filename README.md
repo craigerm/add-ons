@@ -86,7 +86,7 @@ The plugin can also automatically load the next page of content when the user sc
 ##### Example
 
 ``` js
-$('.stream').stStream({ trigger: 'scrolling' });
+$('.stream').stStream({ pagination: 'scrolling' });
 ```
 
 
@@ -95,7 +95,7 @@ Options
 
 Options may be set by passing them in a configuration object when calling the plugin or by setting `data` attributes on the instantiated element. Both methods are interchangeable, but note that the configuration object takes priority.
 
-### nextPageTrigger `string`
+### pagination `string`
 
  - `**manual**` Requires the [nextPage method](#nextpage) method to be called on a desired event.
 
