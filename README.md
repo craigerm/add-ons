@@ -1,7 +1,5 @@
 # st-stream
 
-### [Demo][demo]
-
 **Present aggregated content as a single blended and paginated stream.**
 This jQuery plugin is designed for use in conjunction with the [Storyteller platform][storyteller], but could prove useful anywhere content is paginated by one of these methods:
 
@@ -58,7 +56,7 @@ Pagination requires a `<data>` element for each service, defining a URL where th
 
 Note that newly loaded pages of content won’t be blended in order to maintain the current scroll position when the content is inserted into the DOM. If strict chronological order is required, call the [blend method](#blend) on the [load event](#load).
 
-### Manual Pagination
+### Manual Pagination · [Demo][manual-demo]
 
 New content can be loaded on any desired event by calling the plugin’s [nextPage method](#nextpage).
 
@@ -79,7 +77,7 @@ $('.stream').stStream().on({
 });
 ```
 
-### Scrolling Pagination
+### Scrolling Pagination · [Demo][scrolling-demo]
 
 The plugin can also automatically load the next page of content when the user scrolls to the end of the stream. This UX pattern is commonly referred to as [“endless pagination”][pagination]. The scrolling threshold can be optionally adjusted in pixels to jumpstart the asynchronous request for likely completion before the user has reached the end.
 
@@ -170,7 +168,9 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 
 
 [storyteller]: http://storytellerhq.com
-[demo]: http://264-st-stream.sites.storytellerhq.com/the+killers
+
+[manual-demo]: http://264-st-stream.sites.storytellerhq.com/the+killers
+[scrolling-demo]: http://264-st-stream.sites.storytellerhq.com/the+killers?pagination=scrolling
 
 [jquery]: http://jquery.com/download
 [inview]: https://github.com/protonet/jquery.inview
