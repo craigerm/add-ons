@@ -19,7 +19,7 @@ URL Mapping
 
 Rather than implementing logic to support the above methods individually, st-stream relies upon the presence of pre-generated pagination URLs and parameters in each response. A simple URI template based on on [RFC6570][rfc6570] is used to extract necessary parameter values from these URLs and pass them along to a relative URL responsible for requesting and rendering additional content.
 
-#### Example
+##### Example
 
 Given this URI template:
 
@@ -62,7 +62,7 @@ Note that newly loaded pages of content won’t be blended in order to maintain 
 
 New content can be loaded on any desired event by calling the plugin’s [nextPage method](#nextpage).
 
-#### Example
+##### Example
 
 ``` js
 $('.next').click(function() {
@@ -83,7 +83,7 @@ $('.stream').stStream().on({
 
 The plugin can also automatically load the next page of content when the user scrolls to the end of the stream. This UX pattern is commonly referred to as [“endless pagination”][pagination]. The scrolling threshold can be optionally adjusted in pixels to jumpstart the asynchronous request for likely completion before the user has reached the end.
 
-#### Example
+##### Example
 
 ``` js
 $('.stream').stStream({ trigger: 'scrolling' });
@@ -97,8 +97,9 @@ Options may be set by passing them in a configuration object when calling the pl
 
 ### nextPageTrigger `string`
 
-|**Default: manual**|Requires the [nextPage method](#nextpage) method to be called on a desired event|
-|scrolling|Enables scrolling pagination|
+ - `**manual**` Requires the [nextPage method](#nextpage) method to be called on a desired event.
+
+ - `scrolling` Enables scrolling pagination
 
 ### selector `string`
 
