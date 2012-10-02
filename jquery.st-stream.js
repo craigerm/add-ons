@@ -3,21 +3,29 @@
 	/// Storyteller Stream Plug-in 0.0.2
 	/// Copyright © 2012 Story Arc Corporation · storytellerhq.com
 
-	var methods = {
+	var loadingInProgress = false,
+		scrollingThreshold,
+
+		methods = {
 
 		initialize: function( options ){
-			options = options || {};
+			var options = options || {};
 
 			return this.each( function(){
 				var $this = $( this );
 
+				scrollingThreshold = $this.height() + $this.scrollTop();
+
+				$this.data( 'next-page-trigger', options.nextPageTrigger || $this.data('next-page-trigger') ) || 'manual';
 				$this.data( 'selector', options.selector || $this.data('selector') || 'article' );
 				$this.data( 'uri-template', options.uriTemplate || $this.data('uri-template') );
 
-				if (!$this.data( 'uri-template' ) && window.console && console.error ){
+				if(!$this.data( 'uri-template' ) && window.console && console.error ){
 					console.error('Please provide a URI Template in order to continue.');
 					return false;
 				}
+
+				if( $this.data( 'next-page-trigger') === 'scrolling' ) $this.stStream('scrollToInfinity');
 
 				$this.stStream('blend');
 
@@ -41,9 +49,8 @@
 				var	$data = data || $this;
 
 				var	$content = $data.children( $this.data('selector') ).sort( function( a, b ) {
-						if ($(a).data('datetime')) {
+						if( $(a).data('datetime') )
 							return Date.parse( $(b).data('datetime') ) - Date.parse( $(a).data('datetime') );
-						}
 					}),
 					$nextUrls = $data.children('.nextPage');
 
@@ -69,6 +76,7 @@
 
 			return this.each( function(){
 				var $this = $(this),
+					scrollPosition,
 					nextUrls = [],
 					values = [];
 
@@ -87,12 +95,21 @@
 				$this.trigger( 'loadStart', $this );
 				$this.removeClass('loaded').addClass('loading');
 
+				loadingInProgress = true;
+
 				$.ajax({
 					url: nextUrl,
 					dataType: 'html'
+				}).success(function() {
+					scrollPosition = $(window).scrollTop();
 				}).done(function( results ){
-					$this.append( $(results).contents() ).stStream('blend').removeClass('loading').addClass('loaded');
+					$this.append( $(results).contents() ).removeClass('loading').addClass('loaded');
 					$this.trigger( 'load', $this );
+
+					$(window).scrollTop(scrollPosition);
+
+					scrollingThreshold = $this.height() + $this.scrollTop();
+					loadingInProgress = false;
 				});
 
 			});
@@ -110,6 +127,24 @@
 				});
 
 			return query;
+		},
+		scrollToInfinity: function() {
+
+			return this.each( function(){
+				var $this = $(this),
+					viewportHeight = $(window).height();
+
+				$(window).resize(function() {
+					viewportHeight = $(window).height();
+				});
+
+				$(window).scroll(function(data){
+					if( scrollingThreshold - 200 < ($(window).scrollTop() + viewportHeight) && loadingInProgress === false )
+						$this.stStream('nextPage');
+				});
+
+			});
+
 		}
 
 	};

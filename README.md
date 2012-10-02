@@ -43,7 +43,7 @@ Usage
 
 ### Instantiation
 
-The plugin requires markup consisting of an element containing a stream of recently posted content. Newly loaded content is appended to this stream and blended in reverse chronological order if a `data-datetime` attribute is provided for each content item. These attributes must be set to a date string supported by JavaScript’s `Date.parse` method.
+The plugin requires markup consisting of an element containing a stream of recently posted content. This content is automatically blended in reverse chronological order if a `data-datetime` attribute is provided for each content item. These attributes must be set to a date string supported by JavaScript’s `Date.parse` method.
 
 Pagination requires a `<data>` element for each service, defining a URL where the next page of results may be fetched, correlating to the URI template like so: `{service;parameter-name}`:
 
@@ -56,9 +56,13 @@ Pagination requires a `<data>` element for each service, defining a URL where th
 </div>
 ```
 
-### Loading New Content
+Note that newly loaded pages of content won’t be blended in order to maintain the current scroll position when the content is inserted into the DOM. If strict chronological order is required, call the [blend method](#blend) on the [load event](#load).
 
-New content can be loaded by calling the plugin’s `nextPage` method. This may commonly be called when users interact with a button or UI control, like so:
+### Manual Pagination
+
+New content can be loaded on any desired event by calling the plugin’s [nextPage method](#nextpage).
+
+#### Example
 
 ``` js
 $('.next').click(function() {
@@ -75,7 +79,15 @@ $('.stream').stStream().on({
 });
 ```
 
-Another possible implementation might fire nextPage when the user scrolls to the end of the stream, a UX pattern known as [“endless pagination”][pagination]. The plugin doesn’t offer this functionality, but it’s easy to accomplish with the help of another plugin such as [jQuery inview][inview] or [jQuery appear][appear].
+### Scrolling Pagination
+
+The plugin can also automatically load the next page of content when the user scrolls to the end of the stream. This UX pattern is commonly referred to as [“endless pagination”][pagination]. The scrolling threshold can be optionally adjusted in pixels to jumpstart the asynchronous request for likely completion before the user has reached the end.
+
+#### Example
+
+``` js
+$('.stream').stStream({ trigger: 'scrolling' });
+```
 
 
 Options
@@ -83,9 +95,18 @@ Options
 
 Options may be set by passing them in a configuration object when calling the plugin or by setting `data` attributes on the instantiated element. Both methods are interchangeable, but note that the configuration object takes priority.
 
+### nextPageTrigger `string`
+
+|**Default: manual**|Requires the [nextPage method](#nextpage) method to be called on a desired event|
+|scrolling|Enables scrolling pagination|
+
 ### selector `string`
 
 Selects matching children of the element on which the plugin has been instantiated. Selected elements are blended if they have a valid `data-datetime` attribute. **Default:** `article`
+
+### scrollingThreshold `integer`
+
+Adjusts the scrolling threshold (in pixels) that triggers the next page load when reached. **Default:** `-200` offset from the end of the container element
 
 ### uri-template `string`
 
@@ -100,7 +121,6 @@ The following events may prove useful for:
  - Binding interactions with a UI control to trigger a new page load
  - Offering feedback to users when new content is loading
  - Adjusting scroll position after new content has been loaded
- - Integration with “endless pagination” plugins
 
 ### `blendStart`
 
@@ -134,7 +154,7 @@ Triggers the population of the relative pagination URL from related `<data>` ele
 License
 --------------------------------------------------------------------------------
 
-**This plugin is available under the MIT License.**
+**This plugin is available under the MIT License (Expat).**
 Copyright © 2012 Story Arc Corporation
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
