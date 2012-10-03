@@ -3,34 +3,105 @@
 **Present aggregated content as a single blended and paginated stream.**
 This jQuery plugin is designed for use in conjunction with the [Storyteller platform][storyteller], but could prove useful anywhere content is paginated by one of these methods:
 
- - **Numbered pages:** Pages are computed based on available content and accessed sequentially. Examples: [Flickr][flickr], [Vimeo][vimeo]
+ - **Numbered pages:** Pages are computed based on available content and accessed sequentially.
+ - **Index/Offset:** Increments content by the index of the first content item in each “page” of content.
+ - **Cursoring:** Increasingly typical of timeline-oriented social APIs, this method paginates using ranges of IDs rather than pre-computing “pages” of results.
+ - **Token-based:** Associates each page of content with a unique token, provided in each response for use in the next request.
 
- - **Index/Offset:** Increments content by the index of the first content item in each “page” of content.<br />Examples: [YouTube][youtube], [SoundCloud][soundcloud], [Facebook][facebook], [Tumblr][tumblr]
+### Popular Examples
 
- - **Cursoring:** Increasingly typical of timeline-oriented social APIs, this method paginates using ranges of IDs rather than pre-computing “pages” of results. Examples: [Facebook][facebook], [Twitter][twitter], [Instagram][instagram]
-
- - **Token-based:** Associates each page of content with a unique token, provided in each response for use in the next request. Examples: [Google+][google+]
+<table>
+    <thead>
+        <tr>
+            <th>Service</th>
+            <th>Pagination Method</th>
+            <th>Pagination Parameter</th>
+            <th>Results Parameter</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><a href="http://developers.facebook.com/docs/reference/api/pagination">Facebook</a></td>
+            <td>Cursoring</td>
+            <td><code>after</code></td>
+            <td><code>limit</code></td>
+        </tr>
+        <tr>
+            <td><a href="http://developers.facebook.com/docs/reference/api/pagination">Facebook</a></td>
+            <td>Index/Offset</td>
+            <td><code>offset</code></td>
+            <td><code>limit</code></td>
+        </tr>
+        <tr>
+            <td><a href="http://www.flickr.com/services/api/flickr.photos.getRecent.html">Flickr</a></td>
+            <td>Numbered Pages</td>
+            <td><code>page</code></td>
+            <td><code>per_page</code></td>
+        </tr>
+        <tr>
+            <td><a href="https://developers.google.com/+/api/#pagination">Google+</a></td>
+            <td>Token-based</td>
+            <td><code>nextPageToken</code></td>
+            <td><code>maxResults</code></td>
+        </tr>
+        <tr>
+            <td><a href="http://instagram.com/developer/endpoints#pagination">Instagram</a></td>
+            <td>Cursoring</td>
+            <td><code>max_id</code></td>
+            <td><code>count</code></td>
+        </tr>
+        <tr>
+            <td><a href="http://developers.soundcloud.com/docs#pagination">SoundCloud</a></td>
+            <td>Index/Offset</td>
+            <td><code>offset</code></td>
+            <td><code>limit</code></td>
+        </tr>
+        <tr>
+            <td><a href="http://www.tumblr.com/docs/en/api/v2#posts">Tumblr</a></td>
+            <td>Index/Offset</td>
+            <td><code>offset</code></td>
+            <td><code>limit</code></td>
+        </tr>
+        <tr>
+            <td><a href="https://dev.twitter.com/docs/working-with-timelines">Twitter</a></td>
+            <td>Cursoring</td>
+            <td><code>max_id</code></td>
+            <td><code>count</code></td>
+        </tr>
+        <tr>
+            <td><a href="https://developers.google.com/youtube/2.0/reference#Paging_through_Results">YouTube</a></td>
+            <td>Index/Offset</td>
+            <td><code>start-index</code></td>
+            <td><code>max-results</code></td>
+        </tr>
+        <tr>
+            <td><a href="http://developer.vimeo.com/apis/advanced/methods/vimeo.videos.getAll">Vimeo</a></td>
+            <td>Numbered Pages</td>
+            <td><code>page</code></td>
+            <td><code>per_page</code></td>
+        </tr>
+    </tbody>
+</table>
 
 
 URL Mapping
 --------------------------------------------------------------------------------
 
-Rather than implementing logic to support the above methods individually, st-stream relies upon the presence of pre-generated pagination URLs and parameters in each response. A simple URI template based on on [RFC6570][rfc6570] is used to extract necessary parameter values from these URLs and pass them along to a relative URL responsible for requesting and rendering additional content.
+Rather than implementing logic to support the above methods individually, st-stream relies upon the presence of pre-generated pagination URLs and parameters in each response. A simple URI template based on [RFC6570][rfc6570] is used to extract necessary parameter values from these URLs and pass them along to a relative URL responsible for requesting and rendering additional content.
 
 ##### Example
 
-Given this URI template:
+The following parameter values would be extracted from the pagination URLs below:
+
+ - **max_id:** 252620416600928260 &larr; https://api.twitter.com/1.1/search/tweets.json?q=the+killers&count=15&max_id=252620416600928260
+
+ - **start-index:** 11 &larr; https://gdata.youtube.com/feeds/api/videos?q=the+killers&max-results=5&start-index=11&orderby=published&v=2
+
+The values are then populated into the relative URL using this URI template:
 
 ```
 /content?twitter={twitter;max_id}&youtube={youtube;start-index}
 ```
-
-The following values would be extracted from the pagination URLs below:
-
- - **max_id:** 252620416600928260 https://api.twitter.com/1.1/search/tweets.json?q=the+killers&count=15&max_id=252620416600928260
-
- - **start-index:** 11
-https://gdata.youtube.com/feeds/api/videos?q=the+killers&max-results=5&start-index=11&orderby=published&v=2
 
 
 Usage
@@ -38,12 +109,9 @@ Usage
 
 **[jQuery 1.5][jquery] or higher is required.**
 
+The plugin requires instantiated containers to start with a series of recently posted content items in a flat hierarchy. By default it expects to find `<article>` elements, which are automatically blended in reverse chronological order if they have `data-datetime` attributes. These attributes must be set to a date string supported by JavaScript’s `Date.parse` method.
 
-### Instantiation
-
-The plugin requires markup consisting of an element containing a stream of recently posted content. This content is automatically blended in reverse chronological order if a `data-datetime` attribute is provided for each content item. These attributes must be set to a date string supported by JavaScript’s `Date.parse` method.
-
-Pagination requires a `<data>` element for each service, defining a URL where the next page of results may be fetched, correlating to the URI template like so: `{service;parameter-name}`:
+Pagination requires a `<data class="nextPage">` element for each service, placed anywhere in the container, that defines a URL for the next page of results as it’s value. URI templates `{service;parameter-name}` are used to find these elements and extract a pagination parameter value required to load the next page of content.
 
 ``` html
 <div class="stream" data-uri-template="/content?twitter={twitter;max_id}/youtube={youtube;start-index}">
@@ -55,6 +123,10 @@ Pagination requires a `<data>` element for each service, defining a URL where th
 ```
 
 Note that newly loaded pages of content won’t be blended in order to maintain the current scroll position when the content is inserted into the DOM. If strict chronological order is required, call the [blend method](#blend) on the [load event](#load).
+
+### Pagination Page
+
+A separate page is required to load new pages of content when accessed using the relative pagination URL specified by the URI template. It should feature the same kind of content as the original instantiated container’s content, but pass URL parameters on to each respective service to request new content. This page should not have any wrapper markup other than a single attribute-less `<div>` container.
 
 ### Manual Pagination · [Demo][manual-demo]
 
@@ -95,7 +167,7 @@ Options may be set by passing them in a configuration object when calling the pl
 
 ### pagination `string`
 
- - `**manual**` Requires the [nextPage method](#nextpage) method to be called on a desired event.
+ - **`manual`** Requires the [nextPage method](#nextpage) method to be called on a desired event.
 
  - `scrolling` Enables scrolling pagination
 
@@ -147,7 +219,7 @@ A jQuery object may be optionally passed to this method to be blended but skippi
 
 ### `nextPage`
 
-Triggers the population of the relative pagination URL from related `<data>` elements in the content. An asynchronous request loads and appends it’s response to the stream.
+Triggers a request for the next page of content, building the relative pagination URL from the `<data>` elements. The response is appended to the stream.
 
 ### `toggleScrolling`
 
@@ -178,13 +250,3 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 
 [rfc6570]: http://tools.ietf.org/html/rfc6570
 [pagination]: http://codinghorror.com/blog/2012/03/the-end-of-pagination.html
-
-[facebook]: http://developers.facebook.com/docs/reference/api/pagination
-[flickr]: http://www.flickr.com/services/api/flickr.photos.getRecent.html
-[google+]: https://developers.google.com/+/api/#pagination
-[instagram]: http://instagram.com/developer/endpoints#pagination
-[soundcloud]: http://developers.soundcloud.com/docs#pagination
-[tumblr]: http://www.tumblr.com/docs/en/api/v2#posts
-[twitter]: https://dev.twitter.com/docs/working-with-timelines
-[youtube]: https://developers.google.com/youtube/2.0/reference#Paging_through_Results
-[vimeo]: http://developer.vimeo.com/apis/advanced/methods/vimeo.videos.getAll
