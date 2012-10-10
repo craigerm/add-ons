@@ -19,10 +19,10 @@
 
 				$this.data( 'pagination', options.pagination || $this.data('pagination') ) || 'manual';
 				$this.data( 'selector', options.selector || $this.data('selector') || 'article' );
-				$this.data( 'uri-template', options.uriTemplate || $this.data('uri-template') );
+				$this.data( 'results-page', options.resultsPage || $this.data('results-page') );
 
-				if(!$this.data( 'uri-template' ) && window.console && console.error ){
-					console.error('Please provide a URI Template in order to continue.');
+				if(!$this.data( 'results-page' ) && window.console && console.error ){
+					console.error('Please provide a URI template for the results page in order to continue.');
 					return false;
 				}
 
@@ -105,7 +105,7 @@
                 if (nextUrls.length === 0) {
                     pagesRemaining = false;
                 } else {
-                    var	nextUrl = $this.data('uri-template').replace( /[^{]+(?=\})/g, function(segment){
+                    var	nextUrl = $this.data('results-page').replace( /[^{]+(?=\})/g, function(segment){
                         var service = segment.split(';').shift(),
                             param = segment.split(';').pop();
 

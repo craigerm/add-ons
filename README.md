@@ -96,7 +96,7 @@ The plugin requires instantiated containers to start with a series of recently p
 To load additional content, each set of results must include a `<data>` element that provides key variables to the plugin. The service name must also be provided as a `data-service` parameter, matching the name provided in the pagination URL’s URI template.
 
 ``` html
-<div class="stream" data-uri-template="/results?twitter={twitter;max_id}/youtube={youtube;start-index}">
+<div class="stream" data-results-page="/results?twitter={twitter;max_id}/youtube={youtube;start-index}">
     <article data-datetime="2012-10-01T04:06:33.108Z">
         ···
     </article>
@@ -119,10 +119,10 @@ A dedicated page is required to load new pages of content. It should feature the
 
 ### Results Page URI Template
 
-A `data-uri-template` attribute is required in the container markup that defines a URI template for the results page. Any [pagination variables][#pagination-variables] are indicated where necessary using a `{service-name;parameter-name}` syntax that matches their associated `<data>` elements and the parameters used by each API.
+A `data-results-page` attribute is required in the container markup that defines a URI template for the results page. Any [pagination variables][#pagination-variables] are indicated where necessary using a `{service-name;parameter-name}` syntax that matches their associated `<data>` elements and the parameters used by each API.
 
 ```
-data-uri-template="/results?twitter={twitter;max_id}&youtube={youtube;start-index}&vimeo={vimeo;page}"
+data-results-page="/results?twitter={twitter;max_id}&youtube={youtube;start-index}&vimeo={vimeo;page}"
 ```
 
 When using the numbered page pagination method, specify “page” as the parameter name.
@@ -226,9 +226,9 @@ Selects matching children of the element on which the plugin has been instantiat
 
 Adjusts the scrolling threshold (in pixels) that triggers the next page load when reached. **Default:** `-200` offset from the end of the container element
 
-### uri-template `string`
+### results-page `string`
 
-Defines a relative URL where additional content may be loaded with placeholders for each pagination parameter. Any number of parameters may be defined as path segments or in the query string. **Default:** none
+Defines a relative URI template where additional content may be loaded. Pagination variables should be specified with a `{service-name;parameter-name}` syntax. Any number of these may exist as path segments or in the query string. **Default:** none
 
 
 Events
