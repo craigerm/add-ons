@@ -84,53 +84,100 @@ This jQuery plugin is designed for use in conjunction with the [Storyteller plat
 </table>
 
 
-URL Mapping
+Setup
 --------------------------------------------------------------------------------
 
-Rather than implementing logic to support the above methods individually, st-stream relies upon the presence of pre-generated pagination URLs and parameters in each response. A simple URI template based on [RFC6570][rfc6570] is used to extract necessary parameter values from these URLs and pass them along to a relative URL responsible for requesting and rendering additional content.
+**[jQuery 1.5][jquery] or higher is required.**
 
-##### Example
+### Container Markup
 
-The following parameter values would be extracted from the pagination URLs below:
+The plugin requires instantiated containers to start with a series of recently posted content items in a flat hierarchy. By default it expects to find `<article>` elements, which are automatically blended in reverse chronological order if they have `data-datetime` attributes. These attributes must be set to a date string supported by JavaScript’s `Date.parse` method.
+
+To load additional content, each set of results must include a `<data>` element that provides key variables to the plugin. The service name must also be provided as a `data-service` parameter, matching the name provided in the pagination URL’s URI template.
+
+``` html
+<div class="stream" data-uri-template="/results?twitter={twitter;max_id}/youtube={youtube;start-index}">
+    <article data-datetime="2012-10-01T04:06:33.108Z">
+        ···
+    </article>
+    <data class="nextPage" data-service="twitter" value="https://api.twitter.com/1.1/search/tweets.json?q=the+killers&count=15&max_id=222934460767797251"></data>
+    <data class="nextPage" data-service="youtube" value="https://gdata.youtube.com/feeds/api/videos?q=the+killers&start-index=11&max-results=5&orderby=published&v=2"></data>
+</div>
+```
+
+### Results Page Markup
+
+A dedicated page is required to load new pages of content. It should feature the same kind of content and markup as the original instantiated container’s content, but accept URL parameters that it can pass on to each respective service for requesting additional content. This page should not have any wrapper markup other than a single attribute-less `<div>` container.
+
+``` html
+<div>
+    <article data-datetime="2012-10-01T04:06:33.108Z">
+        ···
+    </article>
+</div>
+```
+
+### Results Page URI Template
+
+A `data-uri-template` attribute is required in the container markup that defines a URI template for the results page. Any [pagination variables][#pagination-variables] are indicated where necessary using a `{service-name;parameter-name}` syntax that matches their associated `<data>` elements and the parameters used by each API.
+
+```
+data-uri-template="/results?twitter={twitter;max_id}&youtube={youtube;start-index}&vimeo={vimeo;page}"
+```
+
+When using the numbered page pagination method, specify “page” as the parameter name.
+
+### Blending Results
+
+Note that results aren’t automatically blended, even if `data-datetime` attributes are present. This is to avoid a disorienting “jump” in the page’s scroll position that can be caused when content items with varying heights are re-inserted into the DOM. If strict chronological order is required, or heights are consistent, simply call the [blend method](#blend) on the [load event](#load).
+
+
+Pagination Variables
+--------------------------------------------------------------------------------
+
+### Numbered Page Method
+
+APIs providing numbered page-based pagination don’t consistently provide the next page number, so this must be calculated based on the current page compared to the total number of results and the number of items per page.
+
+```
+<data class="currentPage" value="2" data-total="573" data-per-page="5" data-service="vimeo"></data>
+```
+
+ - `value` Current page, assumes `1` if omitted
+ - `total` Total number of results. Required
+ - `per-page` Number of items per page. Required
+
+### Other Methods
+
+All other pagination methods require that each service provide a URL pointing to the next page of results.
+
+```
+<data class="nextPage" value="https://gdata.youtube.com/feeds/api/videos?q=the+killers&start-index=11&max-results=5&orderby=published&v=2" data-service="youtube"></data>
+```
+
+This leaves actual implementation in the hands of API providers, a responsibility commonly accepted in the interest of performance.
+
+##### Example Mapping
+
+Referencing the Results Page URI Template, values for pagination variables are extracted from the URLs in the API responses:
 
  - **max_id:** 252620416600928260 &larr; https://api.twitter.com/1.1/search/tweets.json?q=the+killers&count=15&max_id=252620416600928260
 
  - **start-index:** 11 &larr; https://gdata.youtube.com/feeds/api/videos?q=the+killers&max-results=5&start-index=11&orderby=published&v=2
 
-The values are then populated into the relative URL using this URI template:
-
-```
-/content?twitter={twitter;max_id}&youtube={youtube;start-index}
-```
+&rarr; `/results?twitter={twitter;max_id}&youtube={youtube;start-index}&vimeo={vimeo;page}`
 
 
 Usage
 --------------------------------------------------------------------------------
 
-**[jQuery 1.5][jquery] or higher is required.**
+To activate the plugin, simply select an element containing the initial stream of content and call the plugin:
 
-The plugin requires instantiated containers to start with a series of recently posted content items in a flat hierarchy. By default it expects to find `<article>` elements, which are automatically blended in reverse chronological order if they have `data-datetime` attributes. These attributes must be set to a date string supported by JavaScript’s `Date.parse` method.
-
-Pagination requires a `<data class="nextPage">` element for each service, placed anywhere in the container, that defines a URL for the next page of results as it’s value. URI templates `{service;parameter-name}` are used to find these elements and extract a pagination parameter value required to load the next page of content.
-
-``` html
-<div class="stream" data-uri-template="/content?twitter={twitter;max_id}/youtube={youtube;start-index}">
-    <article data-datetime="2012-10-01T04:06:33.108Z">
-        ···
-    </article>
-    <data class="nextPage" data-service="youtube" value="https://gdata.youtube.com/feeds/api/videos?q=the+killers&start-index=11&max-results=5&orderby=published&v=2"></data>
-</div>
+``` js
+$('.stream').stStream();
 ```
 
-Note that newly loaded pages of content won’t be blended in order to maintain the current scroll position when the content is inserted into the DOM. If strict chronological order is required, call the [blend method](#blend) on the [load event](#load).
-
-### Pagination Page
-
-A separate page is required to load new pages of content when accessed using the relative pagination URL specified by the URI template. It should feature the same kind of content as the original instantiated container’s content, but pass URL parameters on to each respective service to request new content. This page should not have any wrapper markup other than a single attribute-less `<div>` container.
-
-### Manual Pagination · [Demo][manual-demo]
-
-New content can be loaded on any desired event by calling the plugin’s [nextPage method](#nextpage).
+New content can be loaded on any desired event by calling the plugin’s [nextPage method](#nextpage). [See a Demo][manual-demo]
 
 ##### Example
 
@@ -149,9 +196,9 @@ $('.stream').stStream().on({
 });
 ```
 
-### Scrolling Pagination · [Demo][scrolling-demo]
+### Scrolling Pagination
 
-The plugin can also automatically load the next page of content when the user scrolls to the end of the stream. This UX pattern is commonly referred to as [“endless pagination”][pagination]. The scrolling threshold can be optionally adjusted in pixels to jumpstart the asynchronous request for likely completion before the user has reached the end.
+The plugin can also automatically load the next page of content when the user scrolls to the end of the stream. This UX pattern is commonly referred to as [“endless pagination”][pagination]. The scrolling threshold can be optionally adjusted in pixels to jumpstart the asynchronous request for likely completion before the user has reached the end. [See a Demo][scrolling-demo]
 
 ##### Example
 

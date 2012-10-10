@@ -53,7 +53,7 @@
 						if( $(a).data('datetime') )
 							return Date.parse( $(b).data('datetime') ) - Date.parse( $(a).data('datetime') );
 					}),
-					$nextUrls = $data.children('.nextPage');
+					$nextUrls = $data.children('.nextPage, .totalPages');
 
 				var $blended = $.merge($content, $nextUrls);
 
@@ -84,14 +84,28 @@
 					values = [];
 
 				$this.find('data.nextPage').each(function(){
-					nextUrls[ $(this).data('segment') ] = $(this).stStream('parseQuery', $(this).attr('value'));
+					nextUrls[ $(this).data('service') ] = $(this).stStream( 'parseQuery', $(this).attr('value') );
+					$(this).remove();
+				});
+
+				$this.find('data.totalPages').each(function(){
+					var currentPage = $(this).data('current-page') ? parseInt( $(this).data('current-page') ) : 1,
+						perPage = parseInt( $(this).data('per-page') );
+					var nextPage = $(this).stStream('calculateNextPage', currentPage, $(this).attr('value'), perPage);
+
+					if (nextPage) {
+						nextUrls[ $(this).data('service') ] = { 'page': nextPage };
+					} else {
+						nextUrls[ $(this).data('service') ] = { 'page': '-' };
+					}
+
 					$(this).remove();
 				});
 
                 if (nextUrls.length === 0) {
                     pagesRemaining = false;
                 } else {
-                    var	nextUrl = $this.data('uri-template').replace( /[^{]+(?=\})/g, function(segment, param){
+                    var	nextUrl = $this.data('uri-template').replace( /[^{]+(?=\})/g, function(segment){
                         var service = segment.split(';').shift(),
                             param = segment.split(';').pop();
 
@@ -143,6 +157,13 @@
 				});
 
 			return query;
+		},
+		calculateNextPage: function( current, total, perPage ){
+			if ((total / perPage) > current) {
+				return current + 1;
+			} else {
+				return false;
+			}
 		},
 		scrollToInfinity: function() {
 
