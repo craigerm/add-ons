@@ -75,10 +75,12 @@
 		},
 		nextPage: function(){
 
-			return this.each( function(){
+            var pagesRemaining = true;
+
+			$(this).each( function(){
 				var $this = $(this),
 					scrollPosition,
-					nextUrls = [],
+					nextUrls = {},
 					values = [];
 
 				$this.find('data.nextPage').each(function(){
@@ -86,32 +88,45 @@
 					$(this).remove();
 				});
 
-				var	nextUrl = $this.data('uri-template').replace( /[^{]+(?=\})/g, function(segment, param){
-					var service = segment.split(';').shift(),
-						param = segment.split(';').pop();
+                if (nextUrls.length === 0) {
+                    pagesRemaining = false;
+                } else {
+                    var	nextUrl = $this.data('uri-template').replace( /[^{]+(?=\})/g, function(segment, param){
+                        var service = segment.split(';').shift(),
+                            param = segment.split(';').pop();
 
-					return nextUrls[service][param] || '';
-				}).replace( /[\{\}]/g, '');
+                        return nextUrls[service][param] || '';
+                    }).replace( /[\{\}]/g, '');
 
-				$this.trigger( 'loadStart', $this );
-				$this.removeClass('loaded').addClass('loading');
+                    $this.trigger( 'loadStart', $this );
+                    $this.removeClass('loaded').addClass('loading');
 
-				loadingInProgress = true;
+                    loadingInProgress = true;
 
-				$.ajax({
-					url: nextUrl,
-					dataType: 'html'
-				}).success(function() {
-					scrollPosition = $(window).scrollTop();
-				}).done(function( results ){
-					$this.append( $(results).contents() ).removeClass('loading').addClass('loaded');
-					$this.trigger( 'load', $this );
+                    $.ajax({
+                        url: nextUrl,
+                        dataType: 'html'
+                    }).success(function() {
+                        scrollPosition = $(window).scrollTop();
+                    }).done(function( results ){
+                        $this.append( $(results).contents() ).removeClass('loading').addClass('loaded');
+                        $this.trigger( 'load', $this );
+                        if ($this.find( 'data.nextPage' ).length === 0) $this.trigger( 'lastPage' );
 
-					$(window).scrollTop(scrollPosition);
+                        $(window).scrollTop(scrollPosition);
 
-					scrollingThreshold = $this.height() + $this.scrollTop();
-					loadingInProgress = false;
-				});
+                        scrollingThreshold = $this.height() + $this.scrollTop();
+                        loadingInProgress = false;
+                    });
+
+                    if (pagesRemaining === false) {
+                        $(this).trigger( 'lastPage' );
+                        return false;
+                    } else {
+                        return $(this);
+                    }
+
+                }
 
 			});
 

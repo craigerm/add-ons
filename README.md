@@ -5,7 +5,7 @@ This jQuery plugin is designed for use in conjunction with the [Storyteller plat
 
  - **Numbered pages:** Pages are computed based on available content and accessed sequentially.
  - **Index/Offset:** Increments content by the index of the first content item in each “page” of content.
- - **Cursoring:** Increasingly typical of timeline-oriented social APIs, this method paginates using ranges of IDs rather than pre-computing “pages” of results.
+ - **Cursoring:** Specifies ranges of IDs or timestamps rather than pre-computing “pages” of results.
  - **Token-based:** Associates each page of content with a unique token, provided in each response for use in the next request.
 
 ### Popular Examples
@@ -200,6 +200,10 @@ Triggered before blended content is inserted into the DOM.
 ### `blend`
 
 Triggered after blended content has been inserted into the DOM.
+
+### `lastPage`
+
+Triggered when no additional content is available to load.
 
 ### `loadStart`
 
