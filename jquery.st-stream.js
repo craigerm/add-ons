@@ -26,9 +26,9 @@
 					return false;
 				}
 
-				if( $this.data( 'pagination') === 'scrolling' ) $this.stStream('scrollToInfinity');
-
 				$this.stStream('blend');
+
+				if( $this.data( 'pagination') === 'scrolling' ) $this.stStream('scrollToInfinity');
 
 				// Bind passed events
 				if( options.events ){
@@ -49,9 +49,15 @@
 				var $this = $(this);
 				var	$data = data || $this;
 
-				var	$content = $data.children( $this.data('selector') ).sort( function( a, b ) {
-						if( $(a).data('datetime') )
-							return Date.parse( $(b).data('datetime') ) - Date.parse( $(a).data('datetime') );
+				var	$content = $data.children( $this.data('selector') ).clone().sort( function( a, b ) {
+						var datetimeA = $(a).data('datetime'),
+							datetimeB = $(b).data('datetime');
+
+						if( datetimeA && isNaN(parseInt( datetimeA ) ) ){
+							return Date.parse( datetimeB ) - Date.parse( datetimeA );
+						} else if( datetimeA ){
+							return datetimeB - datetimeA;
+						}
 					}),
 					$nextUrls = $data.children('.nextPage, .totalPages');
 
@@ -62,11 +68,11 @@
 				if( data ){
 					return $blended;
 				}
-				else if ($blended.length > 0) {
-					$this.empty().append($blended);
+				else if( $blended.length > 0 ){
+					$this.empty().append( $blended );
     				$this.trigger( 'blend', $this );
 				}
-				else if (window.console && console.error) {
+				else if( window.console && console.error ){
 					console.error('Sorry, no content was found. Please try another selector.');
 				}
 
@@ -83,12 +89,14 @@
 					nextUrls = {},
 					values = [];
 
-				$this.find('data.nextPage').each(function(){
+				// Don't specify elements in selectors below - data.class fails	in IE 8
+
+				$this.find('.nextPage').each(function(){
 					nextUrls[ $(this).data('service') ] = $(this).stStream( 'parseQuery', $(this).attr('value') );
 					$(this).remove();
 				});
 
-				$this.find('data.totalPages').each(function(){
+				$this.find('.totalPages').each(function(){
 					var currentPage = $(this).data('current-page') ? parseInt( $(this).data('current-page') ) : 1,
 						perPage = parseInt( $(this).data('per-page') );
 					var nextPage = $(this).stStream('calculateNextPage', currentPage, $(this).attr('value'), perPage);
@@ -105,6 +113,7 @@
                 if (nextUrls.length === 0) {
                     pagesRemaining = false;
                 } else {
+
                     var	nextUrl = $this.data('results-page').replace( /[^{]+(?=\})/g, function(segment){
                         var service = segment.split(';').shift(),
                             param = segment.split(';').pop();
