@@ -81,7 +81,7 @@
 		},
 		nextPage: function(){
 
-            var pagesRemaining = true;
+            var pagesRemaining = false;
 
 			$(this).each( function(){
 				var $this = $(this),
@@ -92,7 +92,14 @@
 				// Don't specify elements in selectors below - data.class fails	in IE 8
 
 				$this.find('.nextPage').each(function(){
-					nextUrls[ $(this).data('service') ] = $(this).stStream( 'parseQuery', $(this).attr('value') );
+					var nextPageUrl = $(this).attr('value');
+					var query = $(this).stStream( 'parseQuery', nextPageUrl );
+
+					if( nextPageUrl && nextPageUrl.length > 0 && !jQuery.isEmptyObject(query) ){
+						nextUrls[ $(this).data('service') ] = query;
+						pagesRemaining = true;
+					}
+
 					$(this).remove();
 				});
 
@@ -101,24 +108,29 @@
 						perPage = parseInt( $(this).data('per-page') );
 					var nextPage = $(this).stStream('calculateNextPage', currentPage, $(this).attr('value'), perPage);
 
-					if (nextPage) {
+					if( nextPage ){
 						nextUrls[ $(this).data('service') ] = { 'page': nextPage };
-					} else {
-						nextUrls[ $(this).data('service') ] = { 'page': '-' };
+						pagesRemaining = true;
 					}
 
 					$(this).remove();
 				});
 
-                if (nextUrls.length === 0) {
-                    pagesRemaining = false;
+                if( pagesRemaining === false ){
+                    $this.trigger( 'lastPage' );
                 } else {
-
                     var	nextUrl = $this.data('results-page').replace( /[^{]+(?=\})/g, function(segment){
                         var service = segment.split(';').shift(),
                             param = segment.split(';').pop();
 
-                        return nextUrls[service][param] || '';
+						if( nextUrls[service] ){
+	                        return nextUrls[service][param] || '99999';
+							/* HACK: this value usually returns 0 results.
+							   Currently w must provide a value to segments. Later we'll pass parameter values in a query string. */
+						} else {
+							return '99999';
+						}
+
                     }).replace( /[\{\}]/g, '');
 
                     $this.trigger( 'loadStart', $this );
@@ -134,7 +146,6 @@
                     }).done(function( results ){
                         $this.append( $(results).contents() ).removeClass('loading').addClass('loaded');
                         $this.trigger( 'load', $this );
-                        if ($this.find( 'data.nextPage' ).length === 0) $this.trigger( 'lastPage' );
 
                         $(window).scrollTop(scrollPosition);
 
@@ -142,12 +153,7 @@
                         loadingInProgress = false;
                     });
 
-                    if (pagesRemaining === false) {
-                        $(this).trigger( 'lastPage' );
-                        return false;
-                    } else {
-                        return $(this);
-                    }
+                    return $(this);
 
                 }
 
