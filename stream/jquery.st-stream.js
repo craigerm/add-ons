@@ -19,7 +19,7 @@
 
 				$this.data( 'pagination', options.pagination || $this.data('pagination') ) || 'manual';
 				$this.data( 'selector', options.selector || $this.data('selector') || 'article' );
-				$this.data( 'results-page', options.resultsPage || $this.data('results-page') );
+				$this.data( 'results-page', options.resultsPage || $this.data('results-page') || document.URL);
 
 				if(!$this.data( 'results-page' ) && window.console && console.error ){
 					console.error('Please provide a URI template for the results page in order to continue.');
@@ -119,19 +119,8 @@
                 if( pagesRemaining === false ){
                     $this.trigger( 'lastPage' );
                 } else {
-                    var	nextUrl = $this.data('results-page').replace( /[^{]+(?=\})/g, function(segment){
-                        var service = segment.split(';').shift(),
-                            param = segment.split(';').pop();
 
-						if( nextUrls[service] ){
-	                        return nextUrls[service][param] || '99999';
-							/* HACK: this value usually returns 0 results.
-							   Currently w must provide a value to segments. Later we'll pass parameter values in a query string. */
-						} else {
-							return '99999';
-						}
-
-                    }).replace( /[\{\}]/g, '');
+                    var nextUrl = $this.data('results-page');
 
                     $this.trigger( 'loadStart', $this );
                     $this.removeClass('loaded').addClass('loading');
@@ -140,7 +129,8 @@
 
                     $.ajax({
                         url: nextUrl,
-                        dataType: 'html'
+                        dataType: 'html',
+                        data: params,
                     }).success(function() {
                         scrollPosition = $(window).scrollTop();
                     }).done(function( results ){
