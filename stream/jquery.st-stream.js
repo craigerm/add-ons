@@ -130,7 +130,7 @@
                     $.ajax({
                         url: nextUrl,
                         dataType: 'html',
-                        data: params,
+                        data: nextUrls,
                     }).success(function() {
                         scrollPosition = $(window).scrollTop();
                     }).done(function( results ){
